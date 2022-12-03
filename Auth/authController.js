@@ -1,6 +1,6 @@
 import { Passanger } from "../DB/passenger.js";
 import { Driver } from "../DB/driver.js";
-import bcrypt, { hash } from "bcrypt";
+import bcrypt from "bcrypt";
 
 class authController {
     
