@@ -16,12 +16,18 @@ const driverSchema = new Schema({
         require: true,
     },
     password: {
-        type: String,
-        require: true
+        hash: { type: String, require: true },
+        salt: { type: String, require: true }
     },
     personalPhoto: String,
-    docPhotos: [String],
-    carPhotos: [String]
+    techCert: {
+        photo:[ { type: String, required: true } ],
+        VIN: { type:String, require: true }
+    },
+    driverLic: {
+        photo:[ { type: String, require: true } ],
+        VIN: { type:String, require: true }
+    }
 });
 
 export const Driver = mongoose.model('Driver', driverSchema);

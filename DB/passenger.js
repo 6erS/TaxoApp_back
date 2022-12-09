@@ -16,10 +16,13 @@ const passengerSchema = new Schema({
         require: true,
     },
     password: {
+        hash: { type: String, require: true },
+        salt: { type: String, require: true }
+    },
+    personalPhoto: {
         type: String,
         require: true
-    },
-    personalPhoto: String
+    }
 });
 
 export const Passanger = mongoose.model('Passenger', passengerSchema);
