@@ -15,18 +15,25 @@ const driverSchema = new Schema({
         type: String,
         require: true,
     },
-    password: {
-        hash: { type: String, require: true },
-        salt: { type: String, require: true }
-    },
+    passwordHash: { type: String, require: true },
+
     personalPhoto: String,
-    techCert: {
-        photo:[ { type: String, required: true } ],
-        VIN: { type:String, require: true }
-    },
-    driverLic: {
-        photo:[ { type: String, require: true } ],
-        VIN: { type:String, require: true }
+
+    techCert: [{ type: String, required: true }],
+
+    VIN: { type: String, require: true },
+
+    driverLic: [{ type: String, require: true }],
+
+    driverLicID: { type: String, require: true },
+
+    tariff: { type: Number, require: true },
+
+    isAvailable: { type: Boolean, require:true, default: false },
+    
+    coordinates: {
+        latitude: { type: Number, require: true, default: 0 },
+        longitude: { type: Number, require: true, default: 0 }
     }
 });
 
