@@ -20,7 +20,6 @@ class authController {
             if (isUnique[0] || isUnique[1]) { return res.status(400).json("Registration Error. Already used phonenumber, please enter another."); }
 
             const passwordSalt = await bcrypt.genSalt(5);
-            console.log(passwordSalt);
             const passwordHash = await bcrypt.hashSync(password, 5);
 
             const passenger = new Passanger({
@@ -75,7 +74,7 @@ class authController {
                 driverLicID:driverlicid,
                 tariff: (Math.floor(Math.random() * 3))
             });
-            console.log(driver);
+            
             await driver.save();
             return res.status(200).json({ massege: 'Registration success.', driver });
 
@@ -100,7 +99,7 @@ class authController {
             
             bcrypt.compare(password, unlogedUser.passwordHash).then((isPasswordCorrect) => {
                 if (isPasswordCorrect) {
-                    return res.status(200).json({ massege: "Login success." });
+                    return res.status(200).json(unlogedUser);
                 }
                 return res.status(400).json({ massege: "Wrong password." });
             });
@@ -111,5 +110,5 @@ class authController {
         }
     }
 }
-// TODO: РАЗОБРАТЬСЯ С СОЛЬЮ. ПРОБЛЕМА В БЕЗОТКАЗНОЙ АВТОРИЗАЦИИ
+
 export const authControllerObj = new authController();
