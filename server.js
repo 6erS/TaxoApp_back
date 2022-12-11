@@ -5,8 +5,6 @@
 // node_modules
 import express from "express";
 import mongoose from "mongoose";
-import JWT from "jsonwebtoken";
-import { header, validationResult } from "express-validator";
 // Personal modules
 import authRouter from "./Auth/authRouter.js";
 
@@ -37,3 +35,5 @@ const start = () => {
 
 
 start();
+
+// 401 - Ошибка проверки авторизации пользователя. Проверка выполняется везде, кроме Login Screen 

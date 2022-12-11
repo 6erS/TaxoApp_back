@@ -17,13 +17,7 @@ const driverSchema = new Schema({
     },
     passwordHash: { type: String, require: true },
 
-    personalPhoto: String,
-
-    techCert: [{ type: String, required: true }],
-
     VIN: { type: String, require: true },
-
-    driverLic: [{ type: String, require: true }],
 
     driverLicID: { type: String, require: true },
 

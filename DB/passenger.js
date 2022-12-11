@@ -15,9 +15,7 @@ const passengerSchema = new Schema({
         type: String,
         require: true,
     },
-    passwordHash: { type: String, require: true },
-    
-    personalPhoto: String
+    passwordHash: { type: String, require: true }
 });
 
 export const Passanger = mongoose.model('Passenger', passengerSchema);
