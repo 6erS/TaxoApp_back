@@ -37,7 +37,7 @@ mongoose
 
 // WSS code here
 //      List of clients online
-const clients = {};
+const currentClients = {};
 
 wss.on('connection', async (ws, req) => {
     try {
@@ -45,7 +45,7 @@ wss.on('connection', async (ws, req) => {
 
         if (!isDriver) {
             const userDB = await Passanger.findById(req.headers._id);
-            clients[userDB._id] = ws;
+            currentClients[userDB._id] = ws;
             ws.send(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
 
             ws.on('message', async (msg) => {
@@ -55,7 +55,7 @@ wss.on('connection', async (ws, req) => {
                 switch (msgObj.type) {
                     case MessageType.getTariffs:
                         const Dist = msgObj.distance;
-                        const priceListAndDrivers = (await getPriceListAndDrivers(msgObj.coords, Dist));
+                        const priceListAndDrivers = (await getPriceListAndDrivers(msgObj.startPoint, Dist));
                         ws.send(JSON.stringify(priceListAndDrivers));
                         break;
                     default:
@@ -65,10 +65,9 @@ wss.on('connection', async (ws, req) => {
 
         } else if (isDriver) {
             const userDB = await Driver.findById(req.headers._id);
-            clients[userDB._id] = ws;
+            currentClients[userDB._id] = ws;
             ws.send(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
 
-            ws.send('Hello authorized driver');
         }
     } catch (error) {
         ws.send(error.message);

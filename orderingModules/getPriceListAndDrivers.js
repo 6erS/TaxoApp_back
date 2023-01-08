@@ -59,7 +59,9 @@ function calculatePriceForTariff(tariffIndex, distance) {
     if (distance > 6250) {
         price += (distance-6.25)*coefficientsForPrices[tariffIndex].grnPerKM;
     }
-    return parseFloat(price.toFixed(2));
+    price *= coefByCurrentTime();
+    price = Math.round(price/10)*10;
+    return Math.trunc(price);
 }
 
 const coefficientsForPrices = [
@@ -67,3 +69,13 @@ const coefficientsForPrices = [
     { minPrice: 75, grnPerKM: 0.012 },
     { minPrice: 100, grnPerKM: 0.016 }
 ];
+
+function coefByCurrentTime() {
+    const d = new Date;
+    const isMorning = d.getHours() > 6 && d.getHours() < 10;
+    const isEvening = d.getHours() > 16 && d.getHours() < 20;
+    if (isMorning || isEvening) {
+        return 1.5;
+    }
+    return 1.1;
+}
