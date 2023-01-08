@@ -7,9 +7,9 @@ const orderSchema = new Schema({
     driverFirstName: { type: String, require: true },
     passengerFirstName: { type: String, require: true },
     orderStatus: { type: String, require: true },
-    coords: [{  latitude: { type: Number, require: true, default: 0 },
+    coordinates: [{  latitude: { type: Number, require: true, default: 0 },
                 longitude: { type: Number, require: true, default: 0 } }],
-    distance: { type: Int }
+    distance: { type: Number, require: true }
 });
 
 export const Order = mongoose.model('Order', orderSchema);

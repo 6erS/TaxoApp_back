@@ -14,6 +14,7 @@ import authRouter from "./Auth/authRouter.js";
 //      Schemas
 import { Passanger } from "./DB/passenger.js";
 import { Driver } from "./DB/driver.js";
+import { Order } from "./DB/order.js";
 //      Extra modules for Orderig logic
 import getPriceListAndDrivers from "./orderingModules/getPriceListAndDrivers.js";
 import { MessageType } from "./orderingModules/messageTypeEnum.js";
@@ -48,16 +49,27 @@ wss.on('connection', async (ws, req) => {
             currentClients[userDB._id] = ws;
             ws.send(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
 
+            let availableDrivers;
             ws.on('message', async (msg) => {
 
                 const msgObj = JSON.parse(msg);
-
+                
                 switch (msgObj.type) {
-                    case MessageType.getTariffs:
+                    case MessageType.getTariffsAndDrivers:
                         const Dist = msgObj.distance;
                         const priceListAndDrivers = (await getPriceListAndDrivers(msgObj.startPoint, Dist));
+                        availableDrivers = priceListAndDrivers.drivers;
                         ws.send(JSON.stringify(priceListAndDrivers));
                         break;
+
+                    case MessageType.sendInviteToDrivers:
+                        availableDrivers.forEach(driver => {
+                            if (driver.tariff == msgObj.chosenTariff) {
+                                currentClients[driver._id].send('Invite for order');
+                            } else console.log('\nERROR\n');
+                        });
+                        break;
+
                     default:
                         ws.send('Wrong request');
                 }

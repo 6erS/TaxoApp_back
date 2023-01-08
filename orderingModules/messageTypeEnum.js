@@ -1,4 +1,4 @@
 export const MessageType = {
-    getTariffs: 'tariffs',
-    getDrivers: 'drivers',
+    getTariffsAndDrivers: 'tariffs',
+    sendInviteToDrivers: 'inviteDrivers',
 }
