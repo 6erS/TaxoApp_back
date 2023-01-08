@@ -5,7 +5,6 @@
 // node_modules
 import express from "express";
 import mongoose from "mongoose";
-import geo from "node-geo-distance";
 import { WebSocketServer } from "ws";
 
 
@@ -55,10 +54,8 @@ wss.on('connection', async (ws, req) => {
 
                 switch (msgObj.type) {
                     case MessageType.getTariffs:
-                        const Dist = geo.haversineSync(msgObj.coords[0], msgObj.coords[1]);
-                        ws.send(`The lengh of the way is ${Dist} meters`);
-                        const priceListAndDrivers = (await getPriceListAndDrivers(msgObj.coords[0], Dist));
-                        console.log(priceListAndDrivers);
+                        const Dist = msgObj.distance;
+                        const priceListAndDrivers = (await getPriceListAndDrivers(msgObj.coords, Dist));
                         ws.send(JSON.stringify(priceListAndDrivers));
                         break;
                     default:

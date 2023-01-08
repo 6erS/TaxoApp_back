@@ -4,7 +4,6 @@ import { Driver } from "../DB/driver.js";
 export default async function getPriceListAndDrivers(startPoint, distance) {
     
     const driversList = await getDriversNearBy(startPoint);
-    console.log(driversList);
     const priceList = getPriceList(driversList, distance);
     const result = {
         tariffs: priceList,
@@ -44,39 +43,27 @@ function getAvailableTariffs(drivers) {
 
 function getPriceList(drivers, distance) {
     let priceList = [null, null, null];
-    const tariffIsAvailable = getAvailableTariffs(drivers); // [true, false, false]
+    const tariffIsAvailable = getAvailableTariffs(drivers); // [false, false, true]
     for (let i = 0; i < 3; i++) {
         if (tariffIsAvailable[i]) {
             priceList[i] = calculatePriceForTariff(i, distance);
         }
         
     }
+    
     return priceList;
 }
 
 function calculatePriceForTariff(tariffIndex, distance) {
-    console.log(distance);
     let price = coefficientsForPrices[tariffIndex].minPrice;
-    console.log(price);
-    console.log(distance-6250);
-    console.log(coefficientsForPrices[tariffIndex].grnPerKM);
     if (distance > 6250) {
         price += (distance-6.25)*coefficientsForPrices[tariffIndex].grnPerKM;
     }
-    return price.toFixed(2);
+    return parseFloat(price.toFixed(2));
 }
 
 const coefficientsForPrices = [
-    {
-        minPrice: 50,
-        grnPerKM: 0.008
-    },
-    {
-        minPrice: 75,
-        grnPerKM: 0.012
-    },
-    {
-        minPrice: 100,
-        grnPerKM: 0.016
-    }
+    { minPrice: 50, grnPerKM: 0.008 },
+    { minPrice: 75, grnPerKM: 0.012 },
+    { minPrice: 100, grnPerKM: 0.016 }
 ];
