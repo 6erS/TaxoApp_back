@@ -29,7 +29,7 @@ class authController {
             });
 
             await passenger.save();
-            return res.status(200).json({ massege: 'Registration success.'});
+            return res.status(200).json(passenger);
 
         } catch (error) {
             console.log(error);
@@ -73,7 +73,7 @@ class authController {
             });
             
             await driver.save();
-            return res.status(200).json({ massege: 'Registration success.'});
+            return res.status(200).json(driver);
 
         } catch (error) {
             console.log(error);
@@ -99,7 +99,10 @@ class authController {
             if (!unlogedUser) {
                 return res.status(400).json(loginErrorMassege);
             }
-            
+
+            unlogedUser.toJSON();
+            unlogedUser
+
             bcrypt.compare(password, unlogedUser.passwordHash).then((isPasswordCorrect) => {
                 if (isPasswordCorrect) {
                     return res.status(200).json(unlogedUser);

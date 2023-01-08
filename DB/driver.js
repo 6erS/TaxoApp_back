@@ -26,8 +26,8 @@ const driverSchema = new Schema({
     isAvailable: { type: Boolean, require:true, default: false },
     
     coordinates: {
-        latitude: { type: Number, require: true, default: 0 },
-        longitude: { type: Number, require: true, default: 0 }
+        latitude: { type: String, require: true, default: '50.44444' },
+        longitude: { type: String, require: true, default: '30.50000' }
     }
 });
 

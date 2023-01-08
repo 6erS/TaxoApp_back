@@ -5,15 +5,15 @@ const passengerSchema = new Schema({
     phoneNumber: {
         type: String,
         unique: true,
-        require: true,
+        require: true
     },
     firstName: {
         type: String,
-        require: true,
+        require: true
     },
     secondName: {
         type: String,
-        require: true,
+        require: true
     },
     passwordHash: { type: String, require: true }
 });
