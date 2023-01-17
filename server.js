@@ -17,7 +17,7 @@ import { Driver } from "./DB/driver.js";
 import { Order } from "./DB/order.js";
 //      Extra modules for Orderig logic
 import getPriceListAndDrivers from "./orderingModules/getPriceListAndDrivers.js";
-import { MessageType } from "./orderingModules/messageTypeEnum.js";
+import { MessageType, OrderStatus } from "./orderingModules/messageTypeEnum.js";
 
 
 // Global constants and configs
@@ -47,39 +47,67 @@ wss.on('connection', async (ws, req) => {
         if (!isDriver) {
             const userDB = await Passanger.findById(req.headers._id);
             currentClients[userDB._id] = ws;
-            ws.send(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
+            console.log(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
 
             let availableDrivers;
+            let orderObj;
+            let priceArr;
+            let Dist;
             ws.on('message', async (msg) => {
-
                 const msgObj = JSON.parse(msg);
-                
                 switch (msgObj.type) {
                     case MessageType.getTariffsAndDrivers:
-                        const Dist = msgObj.distance;
+                        Dist = msgObj.distance;
                         const priceListAndDrivers = (await getPriceListAndDrivers(msgObj.startPoint, Dist));
                         availableDrivers = priceListAndDrivers.drivers;
+                        priceArr = priceListAndDrivers.tariffs;
                         ws.send(JSON.stringify(priceListAndDrivers));
                         break;
 
                     case MessageType.sendInviteToDrivers:
                         availableDrivers.forEach(driver => {
                             if (driver.tariff == msgObj.chosenTariff) {
-                                currentClients[driver._id].send('Invite for order');
+                                orderObj = {
+                                    passangerID: userDB._id,
+                                    passengerFirstName: userDB.firstName,
+                                    startAddress: msgObj.startAddress,
+                                    endAddress: msgObj.endAddress,
+                                    price: priceArr[msgObj.chosenTariff],
+                                    distance: Dist,
+                                };
+                                currentClients[driver._id].send(JSON.stringify(orderObj));
                             } else console.log('\nERROR\n');
                         });
                         break;
-
+                    
                     default:
                         ws.send('Wrong request');
                 }
             });
 
+            ws.on('close', () => {
+                console.log('\nConnection is closed');
+            });
+
         } else if (isDriver) {
             const userDB = await Driver.findById(req.headers._id);
             currentClients[userDB._id] = ws;
-            ws.send(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
-
+            console.log(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
+            
+            ws.on('message', async (msg) => {
+                let msgObj = JSON.parse(msg);
+                switch (msgObj.type) {
+                    case MessageType.orderConfirmedByDriver:
+                        msgObj["orderStatus"] = OrderStatus.isConfirmed;
+                        const order = new Order(msgObj);
+                        console.log(order);
+                        currentClients[order.passangerID].send(JSON.stringify(order));
+                        break;
+                    
+                    default:
+                        ws.send('Wrong request');
+                }
+            })
         }
     } catch (error) {
         ws.send(error.message);
@@ -100,8 +128,3 @@ const start = () => {
 
 // Startpoint execute
 start();
-
-
-
-
-// 401 - Ошибка проверки авторизации пользователя. Проверка выполняется везде, кроме Login Screen 
