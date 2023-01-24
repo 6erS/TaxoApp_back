@@ -12,3 +12,5 @@ Client side are made on Swift by another programmer.
 Server can handle requests for  authorization / connection by WS / making order by passanger.
 Also can send invite for drivers when order is made,
 after confirming order by some driver nearby passanger recive some message like "Order's confirmed. Pls waite for your driver."
+
+Pls, Checking code make sure, that it's orderingLogic branch.
