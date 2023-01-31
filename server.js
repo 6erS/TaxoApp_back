@@ -5,8 +5,9 @@
 // node_modules
 import express from "express";
 import mongoose from "mongoose";
+import http from "http";
 import { WebSocketServer } from "ws";
-
+import { Server } from "socket.io";
 
 // Personal modules
 //      Router
@@ -23,7 +24,9 @@ import { MessageType, OrderStatus } from "./orderingModules/messageTypeEnum.js";
 // Global constants and configs
 const socket = { PORT: 3001, HOST: "127.0.0.1" };
 const app = express();
-const wss = new WebSocketServer({ port: socket.PORT + 1 }, () => console.log("\n\t\tWSS have been started on PORT 3002..."));
+const httpServer = http.createServer(app);
+const io = new Server(httpServer);
+//const wss = new WebSocketServer({ port: socket.PORT + 1 }, () => console.log("\n\t\tWSS have been started on PORT 3002..."));
 app.use(express.json());
 app.use('/auth', authRouter);
 
@@ -40,20 +43,21 @@ mongoose
 //      List of clients online
 const currentClients = {};
 
-wss.on('connection', async (ws, req) => {
-    try {
-        const isDriver = JSON.parse(req.headers.isdriver);
+io.on("connection", async (socketIO) => {
 
+    try {
+        const isDriver = socketIO.handshake.headers.isdriver;
+        
         if (!isDriver) {
-            const userDB = await Passanger.findById(req.headers._id);
-            currentClients[userDB._id] = ws;
+            const userDB = await Passanger.findById(socketIO.handshake.headers._id);
+            currentClients[userDB._id] = socketIO;
             console.log(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
 
             let availableDrivers;
             let orderObj;
             let priceArr;
             let Dist;
-            ws.on('message', async (msg) => {
+            socketIO.on('message', async (msg) => {
                 const msgObj = JSON.parse(msg);
                 switch (msgObj.type) {
                     case MessageType.getTariffsAndDrivers:
@@ -61,7 +65,7 @@ wss.on('connection', async (ws, req) => {
                         const priceListAndDrivers = (await getPriceListAndDrivers(msgObj.startPoint, Dist));
                         availableDrivers = priceListAndDrivers.drivers;
                         priceArr = priceListAndDrivers.tariffs;
-                        ws.send(JSON.stringify(priceListAndDrivers));
+                        socketIO.send(JSON.stringify(priceListAndDrivers));
                         break;
 
                     case MessageType.sendInviteToDrivers:
@@ -85,16 +89,16 @@ wss.on('connection', async (ws, req) => {
                 }
             });
 
-            ws.on('close', () => {
+            socketIO.on('close', () => {
                 console.log('\nConnection is closed');
             });
 
         } else if (isDriver) {
-            const userDB = await Driver.findById(req.headers._id);
-            currentClients[userDB._id] = ws;
+            const userDB = await Driver.findById(socketIO.handshake.headers._id);
+            currentClients[userDB._id] = socketIO;
             console.log(`UID: ${userDB._id}, the user ${userDB.firstName} is connected...`);
             
-            ws.on('message', async (msg) => {
+            socketIO.on('message', async (msg) => {
                 let msgObj = JSON.parse(msg);
                 switch (msgObj.type) {
                     case MessageType.orderConfirmedByDriver:
@@ -105,12 +109,12 @@ wss.on('connection', async (ws, req) => {
                         break;
                     
                     default:
-                        ws.send('Wrong request');
+                        socketIO.send('Wrong request');
                 }
-            })
+            });
         }
     } catch (error) {
-        ws.send(error.message);
+        socketIO.send(error.message);
     }
 });
 
@@ -120,7 +124,7 @@ wss.on('connection', async (ws, req) => {
 const start = () => {
     try {
         // Server Listener - Entrypoint
-        app.listen(socket.PORT, socket.HOST, () => console.log('\n\t\tServer have been started on PORT 3001...'));
+        httpServer.listen(socket.PORT, socket.HOST, () => console.log('\n\t\tServer have been started on PORT 3001...'));
     } catch (error) {
         console.log(error);
     }
